@@ -1,0 +1,55 @@
+// RPG files contain no program declaration, so the Program name "sample1c_CYC=25" comes from the filename
+
+dsply 'foo'; // code without if, for, monitor, etc.                               // CYC  = 1 - sum(CYC) =  1
+
+if Name = 'John'; branch#1; endif;                                                // CYC += 1 - sum(CYC) =  2
+if Name = 'John';                                                                 // CYC += 1 - sum(CYC) =  3
+    branch#1;
+else;
+    branch#2;
+endif;
+if Name = 'John'; branch#1; else; if Name = 'Doe'; branch#2; endif; endif;        // CYC += 2 - sum(CYC) =  5
+if Name = 'John'; branch#1; elseif Name = 'Doe'; branch#2; endif;                 // CYC += 2 - sum(CYC) =  7
+if Name = 'John'; branch#1; elseif Name = 'Doe'; branch#2; else; branch#3 endif;  // CYC += 2 - sum(CYC) =  9
+if Name = 'John';                                                                 // CYC += 3 - sum(CYC) = 12
+    branch#1;
+elseif Name = 'Doe';
+    branch#2;
+elseif Name = 'Doe';
+    branch#3;
+else;
+    branch#4;
+endif;
+
+for i = 1 by 1 to 10; branch#1; endfor;                                           // CYC += 1 - sum(CYC) = 13
+for i = 1 by 1 to 10;                                                             // CYC += 2 - sum(CYC) = 15
+    dsply 'branch#1';
+    ...;
+    for j = 1 by 1 to 10;
+        dsply 'branch#2';
+    endfor;
+    ...;
+endfor;
+
+monitor; ...; endmon;                                                             // CYC += 0 - sum(CYC) = 15
+monitor; ...; on-error; branch#1; endmon;                                         // CYC += 1 - sum(CYC) = 16
+
+select; endsl;                                                                    // CYC += 0 - sum(CYC) = 16
+select; when Name = 'Jane'; branch#1; endsl;                                      // CYC += 1 - sum(CYC) = 17
+select; other; branch#1; endsl;                                                   // CYC += 1 - sum(CYC) = 18
+select; when Name = 'Foo'; branch#1; when Name = 'Bar'; branch#2; endsl;          // CYC += 2 - sum(CYC) = 20
+select;                                                                           // CYC += 3 - sum(CYC) = 23
+    when Name = 'Baz';
+        branch#1;
+    when Name = 'Qux';
+        branch#2;
+    other;
+        branch#3;
+endsl;
+
+dou i >= 10; branch#1; enddo;                                                     // CYC += 1 - sum(CYC) = 24
+
+dow j <= 10; branch#1; enddo; ...;                                                // CYC += 1 - sum(CYC) = 25
+
+call "sample1c_CYC=25" using '...'; // recursive call
+RUN PROGRAM(SAMPLE2C);              // call to another RPG program
